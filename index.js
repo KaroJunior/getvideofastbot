@@ -54,13 +54,21 @@ ytdlp('--version')
 // Helper function to check if link is supported
 const isSupportedLink = (text) => {
     const patterns = [
+        // Instagram
         /(?:https?:\/\/)?(?:www\.)?(?:instagram\.com|instagr\.am)\/(?:reel|p)\/([A-Za-z0-9_-]+)/,
+
+        // TikTok
         /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com)\/(?:@[\w\.]+\/video\/|v\/)(\d+)/,
         /(?:https?:\/\/)?(?:vm\.tiktok\.com)\/(\S+)/,
-        /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/(\S+)/
+        /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/(\S+)/,
+
+        // YouTube Shorts
+        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/shorts\/|youtu\.be\/)([A-Za-z0-9_-]+)/
     ];
-    return patterns.some(pattern => pattern.test(text));
+
+    return patterns.some(p => p.test(text));
 };
+
 
 // Function to extract video info
 const getVideoInfo = async (url) => {
