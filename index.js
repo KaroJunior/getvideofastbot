@@ -267,14 +267,6 @@ bot.launch().then(() => {
     cleanupOldFiles(); // Clean old files on startup 
 });
 
-// Kepp bot alive
-const axios = require('axios');
-
-setInterval(() => {
-  axios.get('https://getvideofastbot.onrender.com')
-    .then(() => console.log('💤 Keep-alive ping sent'))
-    .catch(() => console.log('💤 Keep-alive ping failed'));
-}, 5 * 60 * 1000); // every 5 minutes
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
