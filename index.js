@@ -61,9 +61,6 @@ const isSupportedLink = (text) => {
         /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com)\/(?:@[\w\.]+\/video\/|v\/)(\d+)/,
         /(?:https?:\/\/)?(?:vm\.tiktok\.com)\/(\S+)/,
         /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/(\S+)/,
-
-        // YouTube Shorts
-        /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/shorts\/|youtu\.be\/)([A-Za-z0-9_-]+)/
     ];
 
     return patterns.some(p => p.test(text));
