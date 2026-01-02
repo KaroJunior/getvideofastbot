@@ -12,6 +12,8 @@ ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 require('dotenv').config();
 
+const express = require('express');
+
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const execPromise = util.promisify(exec);
 
@@ -19,6 +21,19 @@ const execPromise = util.promisify(exec);
 const MAX_VIDEO_DURATION = parseInt(process.env.MAX_VIDEO_DURATION) || 90; // seconds
 const MAX_FILE_SIZE = (parseInt(process.env.MAX_FILE_SIZE) || 50) * 1024 * 1024; // bytes
 const TMP_DIR = path.join(__dirname, 'tmp');
+
+// ---- Express keep-alive server (for Render) ----
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+    res.status(200).send('🤖 getvideofastbot is running');
+});
+
+app.listen(PORT, () => {
+    console.log(`🌐 HTTP server running on port ${PORT}`);
+});
+
 
 // Ensure tmp directory exists
 if (!fs.existsSync(TMP_DIR)) {
@@ -220,6 +235,15 @@ const cleanupOldFiles = () => {
         });
     });
 };
+
+bot.telegram.getMe()
+    .then(me => {
+        console.log(`🤖 Connected as @${me.username}`);
+    })
+    .catch(err => {
+        console.error('❌ Telegram API connection failed:', err.message);
+    });
+
 
 // Start bot
 bot.launch().then(() => {
