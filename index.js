@@ -1,6 +1,4 @@
 const { Telegraf } = require('telegraf');
-const { exec } = require('child_process');
-const util = require('util');
 const fs = require('fs');
 const path = require('path');
 const ytdlp = require('yt-dlp-exec'); // REMOVED .default
@@ -15,7 +13,6 @@ require('dotenv').config();
 const express = require('express');
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
-const execPromise = util.promisify(exec);
 
 // Configuration
 const MAX_VIDEO_DURATION = parseInt(process.env.MAX_VIDEO_DURATION) || 90; // seconds
@@ -49,6 +46,11 @@ const cleanupFile = (filePath) => {
     }
 };
 
+ytdlp('--version')
+    .then(v => console.log('🎞 yt-dlp version:', v))
+    .catch(err => console.error('❌ yt-dlp error:', err.message));
+
+
 // Helper function to check if link is supported
 const isSupportedLink = (text) => {
     const patterns = [
@@ -64,13 +66,17 @@ const isSupportedLink = (text) => {
 const getVideoInfo = async (url) => {
     console.log('ℹ️ Fetching video info:', url);
     try {
-        const info = await execPromise(`yt-dlp --dump-json --no-warnings "${url}"`);
-        return JSON.parse(info.stdout);
+        const info = await ytdlp(url, {
+            dumpJson: true,
+            noWarnings: true,
+        });
+        return info;
     } catch (error) {
         console.error('Error getting video info:', error.message);
         return null;
     }
 };
+
 
 // Function to compress video if needed
 const compressVideo = async (inputPath, outputPath, targetSize) => {
@@ -110,7 +116,12 @@ const downloadVideo = async (url, chatId) => {
 
         // Download video using execPromise directly (more reliable)
         console.log('⬇️ Starting download...');
-        await execPromise(`yt-dlp -o "${outputPath}" --no-warnings "${url}"`);
+        await ytdlp(url, {
+            output: outputPath,
+            format: 'mp4',
+            noWarnings: true,
+        });
+
         
         // Check if file was created
         if (!fs.existsSync(outputPath)) {
