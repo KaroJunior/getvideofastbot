@@ -4,6 +4,7 @@ const path = require('path');
 const ytdlp = require('yt-dlp-exec'); // REMOVED .default
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+const https = require('https'); // 👈 ADD THIS
 
 // Configure ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -30,6 +31,18 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🌐 HTTP server running on port ${PORT}`);
 });
+
+// ---- Render keep-alive ping ----
+const KEEP_ALIVE_URL = 'https://getvideofastbot.onrender.com';
+
+setInterval(() => {
+    https.get(KEEP_ALIVE_URL, (res) => {
+        console.log(`🔁 Keep-alive ping sent — status: ${res.statusCode}`);
+    }).on('error', (err) => {
+        console.error('❌ Keep-alive ping failed:', err.message);
+    });
+}, 10 * 60 * 1000); // every 10 minutes
+
 
 
 // Ensure tmp directory exists
