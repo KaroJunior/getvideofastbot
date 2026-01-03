@@ -37,11 +37,11 @@ const KEEP_ALIVE_URL = 'https://getvideofastbot.onrender.com';
 
 setInterval(() => {
     https.get(KEEP_ALIVE_URL, (res) => {
-        console.log(`🔁 Keep-alive ping sent — status: ${res.statusCode}`);
+        console.log(`🔁 Keep-alive ping — ${res.statusCode}`);
     }).on('error', (err) => {
         console.error('❌ Keep-alive ping failed:', err.message);
     });
-}, 10 * 60 * 1000); // every 10 minutes
+}, 5 * 60 * 1000); // every 5 minutes
 
 
 
