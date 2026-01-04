@@ -1,6 +1,6 @@
 # 🎥 getvideofastbot
 
-A simple Telegram bot that lets you **download Instagram Reels and TikTok videos** quickly — no watermark, no extra apps.
+A simple Telegram bot that lets you **download public short-form videos** quickly — no watermark, no extra apps.
 
 Built as a fun challenge to explore Telegram bots, Node.js, and video processing.
 
@@ -8,19 +8,20 @@ Built as a fun challenge to explore Telegram bots, Node.js, and video processing
 
 ## ✨ Features
 
-- 📥 Download videos from:
+- 📥 Download videos from supported platforms:
   - Instagram Reels
   - TikTok (standard + shortened links)
+  - X (Twitter) videos
+  - Facebook (public videos only)
 - 🚀 Fast downloads using `yt-dlp`
 - 🎞 Automatically compresses videos if they’re too large
 - 🤖 Easy to use — just send a link
-- 🌐 Hosted as a web service (kept alive with a lightweight HTTP server)
-
+- 🌐 Hosted as a web service with a lightweight keep-alive server
 ---
 
 ## 🧠 How It Works
 
-1. Send an Instagram or TikTok link to the bot
+1. Send a supported video link to the bot
 2. The bot:
    - Fetches video metadata
    - Checks duration and file size
@@ -88,7 +89,8 @@ The bot will start and connect to Telegram.
 * ❌ YouTube Shorts are not supported (login restrictions) 
 * ⏱ Videos longer than the configured duration are rejected 
 * 🔒 Private or restricted videos may fail to download 
-* 📉 Free hosting may occasionally restart the service 
+* 📉 Free hosting platforms may occasionally restart the service
+* ⚠️ Facebook support is best-effort (public links only)
 
 
 ## 📌 Example Usage
@@ -96,6 +98,8 @@ Send a link like:
 https://www.instagram.com/reel/XXXXXXXX/
 or
 https://vt.tiktok.com/XXXXXXXX/
+or 
+https://x.com/username/status/XXXXXXXX
 
 The bot handles the rest.
 
@@ -111,4 +115,5 @@ Created by Karo Junior 
 
 ## 📄 License
 MIT — feel free to learn from it, fork it, or build something better.
+
 
