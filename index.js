@@ -68,25 +68,23 @@ ytdlp('--version')
 const isSupportedLink = (text) => {
     const patterns = [
         // Instagram
-        /(?:https?:\/\/)?(?:www\.)?(?:instagram\.com|instagr\.am)\/(?:reel|p)\/([A-Za-z0-9_-]+)/,
+        /(?:https?:\/\/)?(?:www\.)?(?:instagram\.com|instagr\.am)\/(?:reel|p)\/[A-Za-z0-9_-]+/,
 
         // TikTok
-        /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com)\/(?:@[\w\.]+\/video\/|v\/)(\d+)/,
-        /(?:https?:\/\/)?(?:vm\.tiktok\.com)\/(\S+)/,
-        /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/(\S+)/,
+        /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com)\/(?:@[\w.]+\/video\/|v\/)\d+/,
+        /(?:https?:\/\/)?(?:vm\.tiktok\.com)\/\S+/,
+        /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/\S+/,
 
         // X (Twitter)
-        /(?:https?:\/\/)?(?:www\.)?(?:x\.com|twitter\.com)\/\w+\/status\/\d+/
+        /(?:https?:\/\/)?(?:www\.)?(?:x\.com|twitter\.com)\/\w+\/status\/\d+/,
 
-        // Facebook
+        // Facebook (public only)
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/.*\/videos\/\d+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/watch\/\?v=\d+/,
         /(?:https?:\/\/)?fb\.watch\/\S+/
-        
-        
     ];
 
-    return patterns.some(p => p.test(text));
+    return patterns.some(pattern => pattern.test(text));
 };
 
 
