@@ -1,10 +1,10 @@
 const { Telegraf } = require('telegraf');
 const fs = require('fs');
 const path = require('path');
-const ytdlp = require('yt-dlp-exec'); // REMOVED .default
+const ytdlp = require('yt-dlp-exec');
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-const https = require('https'); // 👈 ADD THIS
+const https = require('https'); 
 
 // Configure ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -222,7 +222,7 @@ const processVideoLink = async (ctx, url) => {
         } else if (error.message.includes('private') || error.message.includes('login')) {
             errorMessage = '❌ This video is private or requires login.';
         } else if (error.message.includes('429')) {
-            errorMessage = '❌ Rate limited by Instagram/TikTok. Please try again in a few minutes.';
+            errorMessage = '❌ Rate limited by Platform. Please try again in a few minutes.';
         } else {
             errorMessage += 'Please try again with a different link.';
         }
@@ -242,7 +242,7 @@ bot.on('text', async (ctx) => {
         await processVideoLink(ctx, text);
     } else {
         // Original bot response for non-link messages
-        ctx.reply('Send me an Instagram Reel or TikTok link to download the video.');
+        ctx.reply('Send me a supported video link (Instagram, TikTok, X, or Facebook).');
     }
 });
 
