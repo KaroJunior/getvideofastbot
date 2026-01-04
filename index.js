@@ -74,6 +74,16 @@ const isSupportedLink = (text) => {
         /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com)\/(?:@[\w\.]+\/video\/|v\/)(\d+)/,
         /(?:https?:\/\/)?(?:vm\.tiktok\.com)\/(\S+)/,
         /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/(\S+)/,
+
+        // X (Twitter)
+        /(?:https?:\/\/)?(?:www\.)?(?:x\.com|twitter\.com)\/\w+\/status\/\d+/
+
+        // Facebook
+        /(?:https?:\/\/)?(?:www\.)?facebook\.com\/.*\/videos\/\d+/,
+        /(?:https?:\/\/)?(?:www\.)?facebook\.com\/watch\/\?v=\d+/,
+        /(?:https?:\/\/)?fb\.watch\/\S+/
+        
+        
     ];
 
     return patterns.some(p => p.test(text));
