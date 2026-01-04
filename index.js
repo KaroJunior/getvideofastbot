@@ -242,7 +242,7 @@ bot.on('text', async (ctx) => {
         await processVideoLink(ctx, text);
     } else {
         // Original bot response for non-link messages
-        ctx.reply('Send me a supported video link (Instagram, TikTok, X, or Facebook).');
+        ctx.reply('Send me a supported video link and I’ll download it for you.');
     }
 });
 
