@@ -65,6 +65,25 @@ ytdlp('--version')
 
 
 // ---- Usage logging ----
+/**
+ * usage-log.json structure:
+ *
+ * totalDownloads:
+ *   Total number of successful video downloads
+ *
+ * users:
+ *   Map of Telegram chat IDs to number of downloads by that user
+ *   Example: "5541494037": 12
+ *
+ * platforms:
+ *   Aggregate download count per platform
+ *   Does NOT track per-user platform usage
+ *
+ * Notes:
+ * - File resets on redeploy (Render ephemeral storage)
+ * - Intended for lightweight usage insights, not billing
+ */
+
 const USAGE_LOG_PATH = path.join(__dirname, 'usage-log.json');
 
 const loadUsageLog = () => {
