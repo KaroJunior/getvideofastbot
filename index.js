@@ -64,6 +64,61 @@ ytdlp('--version')
     .catch(err => console.error('❌ yt-dlp error:', err.message));
 
 
+// ---- Usage logging ----
+const USAGE_LOG_PATH = path.join(__dirname, 'usage-log.json');
+
+const loadUsageLog = () => {
+    if (!fs.existsSync(USAGE_LOG_PATH)) {
+        return {
+            totalDownloads: 0,
+            users: {},
+            platforms: {
+                instagram: 0,
+                tiktok: 0,
+                x: 0,
+                facebook: 0
+            }
+        };
+    }
+    return JSON.parse(fs.readFileSync(USAGE_LOG_PATH, 'utf8'));
+};
+
+const saveUsageLog = (data) => {
+    fs.writeFileSync(USAGE_LOG_PATH, JSON.stringify(data, null, 2));
+};
+
+const detectPlatform = (url) => {
+    if (url.includes('instagram.com')) return 'instagram';
+    if (url.includes('tiktok.com')) return 'tiktok';
+    if (url.includes('x.com') || url.includes('twitter.com')) return 'x';
+    if (url.includes('facebook.com')) return 'facebook';
+    return 'unknown';
+};
+
+const logUsage = (chatId, url) => {
+    const usage = loadUsageLog();
+    const platform = detectPlatform(url);
+
+    usage.totalDownloads += 1;
+
+    if (!usage.users[chatId]) {
+        usage.users[chatId] = 0;
+    }
+    usage.users[chatId] += 1;
+
+    if (usage.platforms[platform] !== undefined) {
+        usage.platforms[platform] += 1;
+    }
+
+    saveUsageLog(usage);
+
+    console.log(
+        `📊 Usage | user=${chatId} | platform=${platform} | total=${usage.totalDownloads}`
+    );
+};
+
+
+
 // Helper function to check if link is supported
 const isSupportedLink = (text) => {
     const patterns = [
@@ -193,6 +248,8 @@ const processVideoLink = async (ctx, url) => {
         const videoPath = await downloadVideo(url, chatId);
 
         console.log('📤 Sending video to chat:', chatId);
+        logUsage(chatId, url);
+
 
         // Send video to user
         await ctx.replyWithVideo(
