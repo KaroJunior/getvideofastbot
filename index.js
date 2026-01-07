@@ -106,6 +106,20 @@ const saveUsageLog = (data) => {
     fs.writeFileSync(USAGE_LOG_PATH, JSON.stringify(data, null, 2));
 };
 
+const logUsageSummary = (usage) => {
+    console.log('📊 ===== USAGE SUMMARY =====');
+    console.log(`📥 Total downloads: ${usage.totalDownloads}`);
+    console.log(`👥 Unique users: ${Object.keys(usage.users).length}`);
+
+    console.log('📦 Platforms:');
+    for (const [platform, count] of Object.entries(usage.platforms)) {
+        console.log(`   - ${platform}: ${count}`);
+    }
+
+    console.log('📊 =========================');
+};
+
+
 const detectPlatform = (url) => {
     if (url.includes('instagram.com')) return 'instagram';
     if (url.includes('tiktok.com')) return 'tiktok';
@@ -134,7 +148,13 @@ const logUsage = (chatId, url) => {
     console.log(
         `📊 Usage | user=${chatId} | platform=${platform} | total=${usage.totalDownloads}`
     );
+
+    // Log summary every 10 downloads
+    if (usage.totalDownloads % 10 === 0) {
+        logUsageSummary(usage);
+    }
 };
+
 
 
 
