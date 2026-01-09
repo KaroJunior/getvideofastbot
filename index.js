@@ -175,7 +175,9 @@ const isSupportedLink = (text) => {
         // Facebook (public only)
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/.*\/videos\/\d+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/watch\/\?v=\d+/,
-        /(?:https?:\/\/)?fb\.watch\/\S+/
+        /(?:https?:\/\/)?fb\.watch\/\S+/,
+        /(?:https?:\/\/)?(?:www\.)?facebook\.com\/share\/r\/\S+/
+
     ];
 
     return patterns.some(pattern => pattern.test(text));
