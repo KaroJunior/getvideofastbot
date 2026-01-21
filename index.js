@@ -176,6 +176,7 @@ const isSupportedLink = (text) => {
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/.*\/videos\/\d+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/watch\/\?v=\d+/,
         /(?:https?:\/\/)?fb\.watch\/\S+/,
+        /(?:https?:\/\/)?(?:www\.)?facebook\.com\/share\/v\/\S+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/share\/r\/\S+/
 
     ];
