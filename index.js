@@ -43,8 +43,6 @@ setInterval(() => {
     });
 }, 5 * 60 * 1000); // every 5 minutes
 
-
-
 // Ensure tmp directory exists
 if (!fs.existsSync(TMP_DIR)) {
     fs.mkdirSync(TMP_DIR, { recursive: true });
@@ -63,27 +61,7 @@ ytdlp('--version')
     .then(v => console.log('🎞 yt-dlp version:', v))
     .catch(err => console.error('❌ yt-dlp error:', err.message));
 
-
 // ---- Usage logging ----
-/**
- * usage-log.json structure:
- *
- * totalDownloads:
- *   Total number of successful video downloads
- *
- * users:
- *   Map of Telegram chat IDs to number of downloads by that user
- *   Example: "5541494037": 12
- *
- * platforms:
- *   Aggregate download count per platform
- *   Does NOT track per-user platform usage
- *
- * Notes:
- * - File resets on redeploy (Render ephemeral storage)
- * - Intended for lightweight usage insights, not billing
- */
-
 const USAGE_LOG_PATH = path.join(__dirname, 'usage-log.json');
 
 const loadUsageLog = () => {
@@ -119,7 +97,6 @@ const logUsageSummary = (usage) => {
     console.log('📊 =========================');
 };
 
-
 const detectPlatform = (url) => {
     if (url.includes('instagram.com')) return 'instagram';
     if (url.includes('tiktok.com')) return 'tiktok';
@@ -128,16 +105,19 @@ const detectPlatform = (url) => {
     return 'unknown';
 };
 
-const logUsage = (chatId, url) => {
+// Updated to store usernames instead of IDs
+const logUsage = (ctx, url) => {
+    const chatId = ctx.chat.id;
+    const username = ctx.from.username || chatId.toString();
     const usage = loadUsageLog();
     const platform = detectPlatform(url);
 
     usage.totalDownloads += 1;
 
-    if (!usage.users[chatId]) {
-        usage.users[chatId] = 0;
+    if (!usage.users[username]) {
+        usage.users[username] = 0;
     }
-    usage.users[chatId] += 1;
+    usage.users[username] += 1;
 
     if (usage.platforms[platform] !== undefined) {
         usage.platforms[platform] += 1;
@@ -146,7 +126,7 @@ const logUsage = (chatId, url) => {
     saveUsageLog(usage);
 
     console.log(
-        `📊 Usage | user=${chatId} | platform=${platform} | total=${usage.totalDownloads}`
+        `📊 Usage | user=${username} | platform=${platform} | total=${usage.totalDownloads}`
     );
 
     // Log summary every 10 downloads
@@ -155,35 +135,22 @@ const logUsage = (chatId, url) => {
     }
 };
 
-
-
-
 // Helper function to check if link is supported
 const isSupportedLink = (text) => {
     const patterns = [
-        // Instagram
         /(?:https?:\/\/)?(?:www\.)?(?:instagram\.com|instagr\.am)\/(?:reel|p)\/[A-Za-z0-9_-]+/,
-
-        // TikTok
         /(?:https?:\/\/)?(?:www\.)?(?:tiktok\.com)\/(?:@[\w.]+\/video\/|v\/)\d+/,
         /(?:https?:\/\/)?(?:vm\.tiktok\.com)\/\S+/,
         /(?:https?:\/\/)?(?:vt\.tiktok\.com)\/\S+/,
-
-        // X (Twitter)
         /(?:https?:\/\/)?(?:www\.)?(?:x\.com|twitter\.com)\/\w+\/status\/\d+/,
-
-        // Facebook (public only)
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/.*\/videos\/\d+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/watch\/\?v=\d+/,
         /(?:https?:\/\/)?fb\.watch\/\S+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/share\/v\/\S+/,
         /(?:https?:\/\/)?(?:www\.)?facebook\.com\/share\/r\/\S+/
-
     ];
-
     return patterns.some(pattern => pattern.test(text));
 };
-
 
 // Function to extract video info
 const getVideoInfo = async (url) => {
@@ -195,11 +162,10 @@ const getVideoInfo = async (url) => {
         });
         return info;
     } catch (error) {
-        console.error('Error getting video info:', error.message);
+        console.error('❌ Error getting video info:', error.message);
         return null;
     }
 };
-
 
 // Function to compress video if needed
 const compressVideo = async (inputPath, outputPath, targetSize) => {
@@ -224,20 +190,15 @@ const downloadVideo = async (url, chatId) => {
     const filename = `${chatId}_${timestamp}`;
     const outputPath = path.join(TMP_DIR, `${filename}.mp4`);
     console.log('📥 Downloading video:', url);
-    
-    try {
-        // Get video info first
-        const info = await getVideoInfo(url);
-        if (!info) {
-            throw new Error('Could not fetch video information');
-        }
 
-        // Check duration
+    try {
+        const info = await getVideoInfo(url);
+        if (!info) throw new Error('Could not fetch video information');
+
         if (info.duration > MAX_VIDEO_DURATION) {
             throw new Error(`Video too long. Maximum allowed duration is ${MAX_VIDEO_DURATION} seconds.`);
         }
 
-        // Download video using execPromise directly (more reliable)
         console.log('⬇️ Starting download...');
         await ytdlp(url, {
             output: outputPath,
@@ -245,13 +206,8 @@ const downloadVideo = async (url, chatId) => {
             noWarnings: true,
         });
 
-        
-        // Check if file was created
-        if (!fs.existsSync(outputPath)) {
-            throw new Error('Download failed - no file created');
-        }
+        if (!fs.existsSync(outputPath)) throw new Error('Download failed - no file created');
 
-        // Check file size and compress if necessary
         const stats = fs.statSync(outputPath);
         let finalPath = outputPath;
 
@@ -267,80 +223,53 @@ const downloadVideo = async (url, chatId) => {
         return finalPath;
     } catch (error) {
         console.error('❌ Download error:', error.message);
-        // Cleanup on error
-        if (fs.existsSync(outputPath)) {
-            cleanupFile(outputPath);
-        }
+        if (fs.existsSync(outputPath)) cleanupFile(outputPath);
         throw error;
     }
 };
 
 // Process video link
 const processVideoLink = async (ctx, url) => {
-    const chatId = ctx.chat.id;
     const messageId = ctx.message.message_id;
 
     try {
-        // Send "processing" message
         const processingMsg = await ctx.reply('⏳ Downloading video...', {
             reply_to_message_id: messageId
         });
 
-        // Download video
-        const videoPath = await downloadVideo(url, chatId);
+        const videoPath = await downloadVideo(url, ctx.chat.id);
+        logUsage(ctx, url);
 
-        console.log('📤 Sending video to chat:', chatId);
-        logUsage(chatId, url);
+        console.log('📤 Sending video to chat:', ctx.chat.id);
 
+        await ctx.replyWithVideo({ source: videoPath }, {
+            caption: 'Downloaded with @getvideofastbot',
+            reply_to_message_id: messageId
+        });
 
-        // Send video to user
-        await ctx.replyWithVideo(
-            { source: videoPath },
-            {
-                caption: 'Downloaded with @getvideofastbot',
-                reply_to_message_id: messageId
-            }
-        );
-
-        // Delete processing message
         await ctx.deleteMessage(processingMsg.message_id);
-
-        // Cleanup temporary file
         cleanupFile(videoPath);
 
     } catch (error) {
         console.error('❌ Error processing video:', error.message);
-        
-        // Send error message
         let errorMessage = '❌ Failed to download video. ';
-        
-        if (error.message.includes('Video too long')) {
-            errorMessage = `❌ ${error.message}`;
-        } else if (error.message.includes('Unsupported URL') || error.message.includes('not found')) {
-            errorMessage = '❌ Invalid or unsupported link. Please check the URL.';
-        } else if (error.message.includes('private') || error.message.includes('login')) {
-            errorMessage = '❌ This video is private or requires login.';
-        } else if (error.message.includes('429')) {
-            errorMessage = '❌ Rate limited by Platform. Please try again in a few minutes.';
-        } else {
-            errorMessage += 'Please try again with a different link.';
-        }
+        if (error.message.includes('Video too long')) errorMessage = `❌ ${error.message}`;
+        else if (error.message.includes('Unsupported URL') || error.message.includes('not found')) errorMessage = '❌ Invalid or unsupported link.';
+        else if (error.message.includes('private') || error.message.includes('login')) errorMessage = '❌ This video is private or requires login.';
+        else if (error.message.includes('429')) errorMessage = '❌ Rate limited by Platform. Please try again later.';
+        else errorMessage += 'Please try again with a different link.';
 
-        await ctx.reply(errorMessage, {
-            reply_to_message_id: messageId
-        });
+        await ctx.reply(errorMessage, { reply_to_message_id: messageId });
     }
 };
 
 // Text message handler
 bot.on('text', async (ctx) => {
     const text = ctx.message.text;
-    
-    // Check if message contains a supported link
+
     if (isSupportedLink(text)) {
         await processVideoLink(ctx, text);
     } else {
-        // Original bot response for non-link messages
         ctx.reply('Send me a supported video link and I’ll download it for you.');
     }
 });
@@ -348,45 +277,33 @@ bot.on('text', async (ctx) => {
 // Error handling
 bot.catch((err, ctx) => {
     console.error(`Error for ${ctx.updateType}:`, err);
-    if (ctx.message) {
-        ctx.reply('❌ An error occurred. Please try again later.');
-    }
+    if (ctx.message) ctx.reply('❌ An error occurred. Please try again later.');
 });
 
-// Cleanup tmp directory on startup (remove old files)
+// Cleanup tmp directory on startup
 const cleanupOldFiles = () => {
     fs.readdir(TMP_DIR, (err, files) => {
         if (err) return;
-        
         const now = Date.now();
-        const maxAge = 30 * 60 * 1000; // 30 minutes
-        
+        const maxAge = 30 * 60 * 1000;
         files.forEach(file => {
             const filePath = path.join(TMP_DIR, file);
             fs.stat(filePath, (err, stats) => {
-                if (!err && (now - stats.mtimeMs) > maxAge) {
-                    cleanupFile(filePath);
-                }
+                if (!err && (now - stats.mtimeMs) > maxAge) cleanupFile(filePath);
             });
         });
     });
 };
 
 bot.telegram.getMe()
-    .then(me => {
-        console.log(`🤖 Connected as @${me.username}`);
-    })
-    .catch(err => {
-        console.error('❌ Telegram API connection failed:', err.message);
-    });
-
+    .then(me => console.log(`🤖 Connected as @${me.username}`))
+    .catch(err => console.error('❌ Telegram API connection failed:', err.message));
 
 // Start bot
 bot.launch().then(() => {
     console.log('✅ Bot started and connected to Telegram');
-    cleanupOldFiles(); // Clean old files on startup 
+    cleanupOldFiles();
 });
-
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
