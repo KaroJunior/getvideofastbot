@@ -114,6 +114,7 @@ Created by Karo Junior 
 ---
 
 ## 📄 License
-MIT — feel free to learn from it, fork it, or build something better.
+MIT — feel free to learn from it, fork it, or build something better. Don't forget to star.
+
 
 
