@@ -263,6 +263,30 @@ const processVideoLink = async (ctx, url) => {
     }
 };
 
+// Start command
+bot.start((ctx) => {
+    const keyboard = {
+        inline_keyboard: [
+            [{ text: 'More Tools', url: 'https://kezio.netlify.app' }],
+            [{ text: 'Contact Developer', url: 'https://karojunior.netlify.app' }]
+        ]
+    };
+
+    ctx.reply(
+        `🎬 Welcome to Get Video Fast Bot!\n\n` +
+        `Send me a link from:\n` +
+        `• Instagram\n` +
+        `• TikTok\n` +
+        `• X (Twitter)\n` +
+        `• Facebook\n\n` +
+        `I'll download the video and send it back to you.\n\n` +
+        `📌 Just paste a supported link and I'll handle the rest.`,
+        {
+            reply_markup: keyboard
+        }
+    );
+});
+
 // Text message handler
 bot.on('text', async (ctx) => {
     const text = ctx.message.text;
