@@ -257,7 +257,7 @@ const processVideoLink = async (ctx, url) => {
         else if (error.message.includes('Unsupported URL') || error.message.includes('not found')) errorMessage = '❌ Invalid or unsupported link.';
         else if (error.message.includes('private') || error.message.includes('login')) errorMessage = '❌ This video is private or requires login.';
         else if (error.message.includes('429')) errorMessage = '❌ Rate limited by Platform. Please try again later.';
-        else errorMessage += 'Please try again with a different link.';
+        else errorMessage += 'The platform may be temporarily blocking access or the video may require login. Please try again later or try another video.';
 
         await ctx.reply(errorMessage, { reply_to_message_id: messageId });
     }
